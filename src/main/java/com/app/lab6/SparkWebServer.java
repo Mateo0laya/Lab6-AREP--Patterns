@@ -10,10 +10,8 @@ public class SparkWebServer {
 
         staticFiles.location("/public");
 
-        
-        get("log", (req, res) -> RRInvoker.invoke());
+        get("log", (req, res) -> RRInvoker.invoke(req.queryParams("msg")));
 
     }
 
 }
-

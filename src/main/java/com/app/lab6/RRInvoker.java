@@ -9,26 +9,32 @@ import java.net.URL;
 public class RRInvoker {
 
     private static final String USER_AGENT = "Mozilla/5.0";
-    private static final String GET_URL = "http://localhost:5000/logservice";
+    private static final String GET_URL = "http://ec2-18-209-160-174.compute-1.amazonaws.com:";
+    private static String port = null;
 
-    public static String invoke() throws IOException {
+    public static String invoke(String msg) throws IOException {
 
-        URL obj = new URL(GET_URL);
+        setPort();
+
+        String urlMsg = msg.replaceAll(" ", "%20");
+        String url = GET_URL + port + "/logservice?log=" + urlMsg;
+
+        URL obj = new URL(url);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
         con.setRequestMethod("GET");
         con.setRequestProperty("User-Agent", USER_AGENT);
-        
-        //The following invocation perform the connection implicitly before getting the code
+
+        // The following invocation perform the connection implicitly before getting the
+        // code
         int responseCode = con.getResponseCode();
         System.out.println("GET Response Code :: " + responseCode);
 
         StringBuffer response = new StringBuffer();
-        
+
         if (responseCode == HttpURLConnection.HTTP_OK) { // success
             BufferedReader in = new BufferedReader(new InputStreamReader(
                     con.getInputStream()));
             String inputLine;
-            
 
             while ((inputLine = in.readLine()) != null) {
                 response.append(inputLine);
@@ -44,4 +50,16 @@ public class RRInvoker {
         return response.toString();
     }
 
-} 
+    private static void setPort() {
+        if (port == null) {
+            port = "35001";
+        } else if (port == "35001") {
+            port = "35002";
+        } else if (port == "35002") {
+            port = "35003";
+        } else {
+            port = "35001";
+        }
+    }
+
+}

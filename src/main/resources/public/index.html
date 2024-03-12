@@ -19,8 +19,11 @@
                 let nameVar = document.getElementById("phrs").value;
                 const xhttp = new XMLHttpRequest();
                 xhttp.onload = function() {
-                    document.getElementById("getrespmsg").innerHTML =
-                    this.responseText;
+                    let responseText = this.responseText;
+                    let formattedText = responseText.replace(/}/g, '}<br>');
+                    document.getElementById("getrespmsg").innerHTML = formattedText;
+                    // document.getElementById("getrespmsg").innerHTML =
+                    // this.responseText;
                 }
                 xhttp.open("GET", "/log?msg="+nameVar);
                 xhttp.send();
