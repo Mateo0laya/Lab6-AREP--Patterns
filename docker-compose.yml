@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  sparkwebserver:
+    build:
+      context: .
+      dockerfile: DockerfileServer
+    ports:
+      - "4567:4567"
+    environment:
+      - PORT=35001  # El puerto para el primer LogService
+
+  logservice1:
+    build:
+      context: .
+      dockerfile: DockerfileService
+    ports:
+      - "35001:35001"  # Puerto interno del contenedor
+
+  logservice2:
+    build:
+      context: .
+      dockerfile: DockerfileService
+    ports:
+      - "35002:35002"  # Puerto interno del contenedor
+
+  logservice3:
+    build:
+      context: .
+      dockerfile: DockerfileService
+    ports:
+      - "35003:35003"  # Puerto interno del contenedor
+
