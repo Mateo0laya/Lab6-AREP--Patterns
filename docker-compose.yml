@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 services:
   sparkwebserver:
@@ -7,27 +7,38 @@ services:
       dockerfile: DockerfileServer
     ports:
       - "4567:4567"
-    environment:
-      - PORT=35001  # El puerto para el primer LogService
 
   logservice1:
     build:
       context: .
       dockerfile: DockerfileService
     ports:
-      - "35001:35001"  # Puerto interno del contenedor
+      - "35001:35000" # Puerto interno del contenedor
 
   logservice2:
     build:
       context: .
       dockerfile: DockerfileService
     ports:
-      - "35002:35002"  # Puerto interno del contenedor
+      - "35002:35000" # Puerto interno del contenedor
 
   logservice3:
     build:
       context: .
       dockerfile: DockerfileService
     ports:
-      - "35003:35003"  # Puerto interno del contenedor
+      - "35003:35000" # Puerto interno del contenedor
 
+  db:
+    image: mongo:3.6.1
+    container_name: db
+    volumes:
+      - mongodb:/data/db
+      - mongodb_config:/data/configdb
+    ports:
+      - 27017:27017
+    command: mongod
+
+volumes:
+  mongodb:
+  mongodb_config:

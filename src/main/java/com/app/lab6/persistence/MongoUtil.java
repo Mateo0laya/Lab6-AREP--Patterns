@@ -5,7 +5,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
 
 public class MongoUtil {
-    private static final String CONNECTION_STRING = "mongodb://ec2-18-209-160-174.compute-1.amazonaws.com:27017";
+    private static final String CONNECTION_STRING = "mongodb://db:27017";
     private static final String DATABASE_NAME = "LogsDB";
 
     public static MongoDatabase getDB() {

@@ -23,6 +23,6 @@ public class LogService {
         if (System.getenv("PORT") != null) {
             return Integer.parseInt(System.getenv("PORT"));
         }
-        return 35001;
+        return 35000;
     }
 }

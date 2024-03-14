@@ -9,15 +9,16 @@ import java.net.URL;
 public class RRInvoker {
 
     private static final String USER_AGENT = "Mozilla/5.0";
-    private static final String GET_URL = "http://ec2-18-209-160-174.compute-1.amazonaws.com:";
-    private static String port = null;
+    private static final String GET_URL = "http://logservice";
+    private static final String PORT = ":35000";
+    private static String SERVER = null;
 
     public static String invoke(String msg) throws IOException {
 
-        setPort();
+        setServer();
 
         String urlMsg = msg.replaceAll(" ", "%20");
-        String url = GET_URL + port + "/logservice?log=" + urlMsg;
+        String url = GET_URL + SERVER + PORT + "/logservice?log=" + urlMsg;
 
         URL obj = new URL(url);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -50,15 +51,15 @@ public class RRInvoker {
         return response.toString();
     }
 
-    private static void setPort() {
-        if (port == null) {
-            port = "35001";
-        } else if (port == "35001") {
-            port = "35002";
-        } else if (port == "35002") {
-            port = "35003";
-        } else {
-            port = "35001";
+    private static void setServer() {
+        if (SERVER == null) {
+            SERVER = "1";
+        } else if (SERVER.equals("1")) {
+            SERVER = "2";
+        } else if (SERVER.equals("2")) {
+            SERVER = "3";
+        } else if (SERVER.equals("3")) {
+            SERVER = "1";
         }
     }
 
