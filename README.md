@@ -1,25 +1,36 @@
 # TALLER 6 MODULARIZACIÓN CON VIRTUALIZACIÓN E INTRODUCCIÓN A DOCKER
 
-El taller consiste en crear una aplicación web pequeña usando el micro-framework de Spark java (http://sparkjava.com/). Una vez tengamos esta aplicación procederemos a construir un container para docker para la aplicación y los desplegaremos y configuraremos en nuestra máquina local. Luego, cerremos un repositorio en DockerHub y subiremos la imagen al repositorio. Finalmente, crearemos una máquina virtual de en AWS, instalaremos Docker , y desplegaremos el contenedor que acabamos de crear.
-Este proyecto es una aplicación web con las siguientes funciones: Seno, Coseno, Palindrome, Magnitud. El proyecto fue construido usando Java, Spark y adicionalmente se subio a DockerHub. 
+Para este taller se debe crear una aplicación web, la cual esta dividida en una fachada que recibe las peticiones del cliente web y las redirige a un balanceador de carga que implementa el algoritmo Round Robin para redirigir nuevamente las solicitudes a uno de los tres servicios encargados de atender cada una de las peticiones, por último, estos servicios tienen conexión a una base de datos Mongo donde deberá almacenar y solicitar los datos almacenados en la base de datos.
+Cada uno de estos componentes debe ser una imagen propia corriendo en el motor de docker, dentro de un EC-2 de AWS después de haber configurado correctamente las reglas de seguridad de entrada apropiadas para el correcto funcionamiento de la aplicación.
 
 ## Arquitectura 
 La arquitectura debe tener las siguientes características.
 
+![image](https://github.com/Mateo0laya/Lab6-AREP--Patterns/assets/89365336/d5495f99-84f9-45dc-a8fe-06971bbfeb48)
+
+
 1. El cliente Web debe ser un cliente asíncrono que corra en el browser.
 2. La aplicación debe ser multiusuario.
-3. En el backend debe utilizar solo Java. No puede utilizar frameworks como SPRING.
-4. Entrega archivos estáticos como páginas HTML.
-5. Permite configurar el directorio de donde se leerán los archivos estáticos.
-6. Permite leer parámetros del query  desde los programas.
-7. SparkJava como framework para la aplicación web
-8. Dockerfile y compose para el manejo de imagenes y contenedores con Docker
+3. El servicio MongoDB es una instancia de MongoDB corriendo en un container de docker en una máquina virtual de EC2
+4. LogService es un servicio REST que recibe una cadena, la almacena en la base de datos y responde en un objeto JSON con las 10 ultimas cadenas almacenadas en la base de datos y la fecha en que fueron almacenadas.
+5. La aplicación web APP-LB-RoundRobin está compuesta por un cliente web y al menos un servicio REST. El cliente web tiene un campo y un botón y cada vez que el usuario envía un mensaje, este se lo envía al servicio REST y actualiza la pantalla con la información que este le regresa en formato JSON. El servicio REST recibe la cadena e implementa un algoritmo de balanceo de cargas de Round Robin, delegando el procesamiento del mensaje y el retorno de la respuesta a cada una de las tres instancias del servicio LogService.
+6. Entrega archivos estáticos como páginas HTML.
+7. Permite configurar el directorio de donde se leerán los archivos estáticos.
+8. Permite leer parámetros del query  desde los programas.
+9. SparkJava como framework para la aplicación web.
+10. Dockerfile y compose para el manejo de imagenes y contenedores con Docker.
+11. Debe ser accesible desde internet usando el servicio EC-2 de AWS.
+12. La aplicación corre sobre el puerto 4567
+13. Los servicios corren sobre los puertos 35001, 35002 y 35003.
+14. La base de datos Mongo corre sobre el puerto 27017.
 
 ## Diseño de la aplicación
 
 - La aplicación usa SparkJava para correr el servidor Http.
 - Desde la clase SparkWebServer.java se puede configurar las respuestas del servidor mediante el uso de funciones Lambda.
-- En el directorio \scr\main\java\com\arep\taller5\resources\public se pueen añadir archivos estaticos como HTML, CSS, JS o imagenes.
+- En el directorio \scr\main\java\com\app\lab6\resources\public se pueen añadir archivos estaticos como HTML, CSS, JS o imagenes.
+- RRInvoker es el balanceador de carga.
+- LogService es la clase encargada de atender las peticiones y comunicarse con la base de datos, para este caso la aplicación cuenta con tres instancias de LogService
 
 # Extensión de la aplicación
 
@@ -30,81 +41,101 @@ La arquitectura debe tener las siguientes características.
 
 Estas instrucciones le permitirán obtener una copia del proyecto en funcionamiento en su máquina local para fines de desarrollo y prueba.
 
-### Prerequisitos
+### Prerrequisitos
 
 - Java 8
 - Maven
 - Git
 - Navegador web
 - Docker
+- AWS EC-2
 
 ### Instalación
 
-#### Github
+#### Local
 Ubiquese en el directorio en donde desea descargar el repositorio
 
-`git clone https://github.com/Mateo0laya/Taller-5-AREP---Docker.git`
+`git clone https://github.com/Mateo0laya/Lab6-AREP--Patterns.git`
 
 Cambie al directorio del repositorio
 
-`cd Taller-5-AREP---Docker`
+`cd Lab6-AREP--Patterns`
 
 Compile el proyecto
 
-`mvn compile`
-
-Empaquete el proyecto
-
-`mvn package`
+`mvn clean install`
 
 Inicie el servidor
 
-`java -cp "target/classes:target/dependency/*" com.arep.taller5.SparkWebServer`
+`docker-compose up --build`
 
-Una alternativa a la linea de comandos es realizar la ejecución desde un IDE. En este caso Visual Studio Code desde la clase SparkWebServer.java
-![image](https://github.com/Mateo0laya/Taller-5-AREP---Docker/assets/89365336/5000a08a-7075-4c72-bf3f-3609d51e274a)
+Deberá tener un contenedor en Docker Desktop con 5 imágenes como aparece a continuación:
 
-#### Docker
-Recuerde tener Docker en su m[aquina para usar este medio de instalacion. Ejecute el siguiente comando:
-`docker run -d -p 35000:46000 --name firstdockercontainer mateo0laya/taller5arep`
+![image](https://github.com/Mateo0laya/Lab6-AREP--Patterns/assets/89365336/0b45b061-d55d-4344-adc7-9e420df130d5)
 
-Deberá obtener una respuesta similar a la siguiente:
 
-![image](https://github.com/Mateo0laya/Taller-5-AREP---Docker/assets/89365336/1b5263a6-40fd-4a26-b827-0f4217c6d831)
+#### AWS
+Una vez tenga su instancia de EC-2 en ejecución, realice la conexión de su preferencia, en mi caso estoy usando SSH.
 
-Y verificar en DockerDesktop que esta corriendo:
+Lo primero que debe hacer es actualizar los paquetes de instalación del sistema operativo
 
-![image](https://github.com/Mateo0laya/Taller-5-AREP---Docker/assets/89365336/b10f0ab6-c271-4c2e-b8c3-f135b55db77e)
+`sudo yum update -y`
 
+Ahora debe instalar Docker, Maven, Git y Docker-Compose
+
+`sudo yum install docker`
+
+`sudo yum install maven`
+
+`sudo yum install git`
+
+Para la instalación de Docker-Compose ejecute los siguientes comandos 
+
+`sudo curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose`
+
+`sudo chmod +x /usr/local/bin/docker-compose`
+
+Por último repita el proceso de instalación local en la instancia del EC-2 y debera ver algo a lo mostrado a continuación
+
+![image](https://github.com/Mateo0laya/Lab6-AREP--Patterns/assets/89365336/4881b7eb-4ab1-4dc5-9f9c-7bf411adb417)
 
 
 ## Probando la aplicación
+A continuación encuentra un video donde se detalla las pruebas de la aplicación
 
-Si ejecuta la aplicación usando java recuerde usar el puerto 4567, en el caso de las siguientes pruebas se realizaron usando Docker por lo tanto se usa el puerto 35000:
+Para probar la aplicación lo podemos realizar con ejecución en local, o desde una instancia EC-2 de AWS, en este caso optaré por la segunda opción. Una vez con la aplicación corriendo podemos empezar con las pruebas
 
-Ingrese a la siguiente dirección: http://localhost:35000/ Deberá ver la siguiente página:
-![image](https://github.com/Mateo0laya/Taller-5-AREP---Docker/assets/89365336/6a802fcc-ec35-4db9-8446-909ae9f2b0dc)
+Desde el navegador accederemos a la dirección DNS proporcionada por AWS para nuestra instancia EC-2, es importante recordar que la aplicación corre sobre el puerto 4567. Del mismo modo debemos acceder usando el protocolo http, en mi caso la dirección es la siguiente, pero en su caso debe variar: http://ec2-34-233-121-200.compute-1.amazonaws.com:4567/
 
-### Seno
+![image](https://github.com/Mateo0laya/Lab6-AREP--Patterns/assets/89365336/e8360808-611e-4491-bbb2-9eba6cd9f21c)
 
-Para la función Seno, ingrese el valor que desea calcular en **radianes** y de click en el botón de submit:
-![image](https://github.com/Mateo0laya/Taller-5-AREP---Docker/assets/89365336/6f20ca0f-abb9-40a8-8213-3e601709f503)
+Una vez en la página dispondremos de un campo de texto donde podremos ingresar datos a almacenar, recuerde hacer uso del botón submit dando click, no use la tecla enter
+![image](https://github.com/Mateo0laya/Lab6-AREP--Patterns/assets/89365336/92e50685-1440-4015-9fbb-7c11b27b2aad)
 
+Seguiremos añadiendo datos hasta completar 10 registros
 
-Para la función Coseno, ingrese el valor que desea calcular en **radianes** y de click en el botón de submit:
-![image](https://github.com/Mateo0laya/Taller-5-AREP---Docker/assets/89365336/cb0e85f4-ff73-4eb2-9b00-eefb5a4b76e2)
+![image](https://github.com/Mateo0laya/Lab6-AREP--Patterns/assets/89365336/dbaf6178-ce94-44c2-b46b-0175f084696c)
 
-Para la función Palindromo, ingrese una palabra (**String**) y de click en el botón de submit:
-![image](https://github.com/Mateo0laya/Taller-5-AREP---Docker/assets/89365336/9cf45625-15b2-44f6-a297-2756879c9126)
+En este punto verificaremos el funcionamiento del balanceador de carga en la terminal SSH de la instancia EC-2
 
-Para la función Magnitud, ingrese dos coordenadas **x,y** y de click en el botón de submit:
-![image](https://github.com/Mateo0laya/Taller-5-AREP---Docker/assets/89365336/9b7f8433-4007-477d-9113-995b904ab13f)
+![image](https://github.com/Mateo0laya/Lab6-AREP--Patterns/assets/89365336/15128c14-6459-40c9-9b80-059c8bae5bcf)
+
+![image](https://github.com/Mateo0laya/Lab6-AREP--Patterns/assets/89365336/bd4f7e9f-d011-46ab-8337-965365521cf1)
+
+![image](https://github.com/Mateo0laya/Lab6-AREP--Patterns/assets/89365336/f30a3846-b34f-4abb-82fe-b971ba54c0e1)
+
+Como se observa las peticiones son atendidas de manera ordenada y equitativa por los servicios. Una vez añadamos un nuevo registro el primero que añadimos ya no será visible pues unicamente son visibles los ultimos 10 registros
+
+![image](https://github.com/Mateo0laya/Lab6-AREP--Patterns/assets/89365336/1208b91a-1038-443a-95ce-446e0fc7028b)
 
 
 ## Construido con
 
 * [Java](https://www.java.com/es/) - The main programming language
 * [Maven](https://maven.apache.org/) - Dependency Management
+* [Spark](https://sparkjava.com/) - MicroFramework Web
+* [Docker](https://www.docker.com/) - Virtualization Software
+* [EC-2 AWS](https://aws.amazon.com/es/ec2/) - cloud Processing
 
 ## Version
 
