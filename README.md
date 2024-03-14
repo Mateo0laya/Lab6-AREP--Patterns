@@ -101,7 +101,7 @@ Por último repita el proceso de instalación local en la instancia del EC-2 y d
 
 
 ## Probando la aplicación
-A continuación encuentra un video donde se detalla las pruebas de la aplicación
+A continuación encuentra un video donde se detalla las pruebas de la aplicación: https://youtu.be/1reViYFXefU
 
 Para probar la aplicación lo podemos realizar con ejecución en local, o desde una instancia EC-2 de AWS, en este caso optaré por la segunda opción. Una vez con la aplicación corriendo podemos empezar con las pruebas
 
